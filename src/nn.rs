@@ -56,44 +56,29 @@ where
         println!("Mat ({:?} x {:?}):", self.rows, self.cols);
         println!("Memory location: {:?}", self.data_stream);
 
-        let num_elements_usize = match (self.rows.to_usize(), self.cols.to_usize()) {
-            (Some(rows_usize), Some(cols_usize)) => rows_usize * cols_usize,
-            _ => panic!("Conversion to usize failed"),
-        };
-
         // Calculate the maximum number of digits in column indices
         let max_col_digits = self.cols.to_usize().unwrap().to_string().len();
 
-        // Print column indicators
-        print!("{:<width$}", "", width = max_col_digits + padding + 4); // Add padding + 2 for spacing
-        for j in 0..self.cols.to_usize().unwrap() {
-            print!("{:<width$}", j, width = max_col_digits + padding);
-        }
-        println!();
-        println!();
-
-        let mut current_row = 0;
+        let rows_usize = match self.rows.to_usize() {
+            Some(rows_usize) => rows_usize ,
+            _ => panic!("Conversion to usize failed for Rows"),
+        };
+        let cols_usize = match self.cols.to_usize() {
+            Some(cols_usize) => cols_usize ,
+            _ => panic!("Conversion to usize failed for Columns"),
+        };
         unsafe {
-            for i in 0..num_elements_usize {
-                let value = *self.data_stream.add(i);
-
-                // Check if a new row starts
-                if i % self.cols.to_usize().unwrap() == 0 {
-                    current_row += 1;
-                    print!(
-                        "Row {:<width$}",
-                        current_row,
-                        width = max_col_digits + padding
-                    );
+            println!("[");
+            for i in 0..rows_usize {
+                print!("{:padding$}", "", padding = padding);
+                // print!("Row: {:<width$}", i, width = max_col_digits + padding);
+                for j in 0..cols_usize {
+                    let value = *self.data_stream.add(i*cols_usize + j);
+                    print!("{:<width$}",value, width = max_col_digits + padding);
                 }
-
-                print!("{:<width$}", value, width = max_col_digits + padding); // Adjust the width as per your preference
-
-                // Check if a new row starts
-                if (i + 1) % self.cols.to_usize().unwrap() == 0 {
-                    println!(); // Print a new line
-                }
+                println!();
             }
+            println!("]");
         }
     }
 }
