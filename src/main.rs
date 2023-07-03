@@ -1,7 +1,13 @@
 mod nn;
 
 fn main() {
-    let m =  nn::Mat::new(15, 20);
-    // println!("Matrix Cols: {} Rows: {} Data Stream: {:?} !!", m.rows, m.cols, m.data_stream);
-    m.print(None);
+    let mut n =  nn::Mat::new(15, 20);
+    let mut m =  nn::Mat::new(15, 20);
+    n.fill(10);
+    m.fill(10);
+    
+    n.rand(1, 10);
+    m.rand(1, 10);
+    let add = nn::add_matrices(&n, &m);
+    add.print(None);
 }
