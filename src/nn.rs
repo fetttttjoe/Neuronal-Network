@@ -182,7 +182,7 @@ T: Copy + Add<Output = T> + PartialEq + NumCast + num_traits::Zero + num_traits:
         }
     }
 
-    result
+    return result;
 }
 impl<T: ToPrimitive> Drop for Mat<T> {
     fn drop(&mut self) {
