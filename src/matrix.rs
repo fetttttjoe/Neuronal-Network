@@ -1,4 +1,4 @@
-use num_traits::{CheckedMul, PrimInt, FromPrimitive, NumCast, Zero};
+use num_traits::{CheckedMul, FromPrimitive, NumCast, PrimInt, Zero};
 use rand::{thread_rng, Rng};
 use std::cmp::PartialOrd;
 use std::default::Default;
@@ -30,6 +30,21 @@ macro_rules! safe_get {
     };
 }
 
+macro_rules! to_usize {
+    ($value:expr) => {
+        match $value.to_usize() {
+            Some(result) => result,
+            _ => panic!("Conversion to usize failed"),
+        }
+    };
+}
+
+macro_rules! range {
+    ($start:expr, $end:expr) => {
+        ($start..$end)
+    };
+}
+
 pub struct Mat<T> {
     pub rows: T,
     pub cols: T,
@@ -49,7 +64,7 @@ where
 }
 impl<T> Mat<T>
 where
-    T: CheckedMul+ PrimInt + NumCast + Zero + PartialOrd + Mul<Output = T> + Copy,
+    T: CheckedMul + PrimInt + NumCast + Zero + PartialOrd + Mul<Output = T> + Copy,
 {
     pub fn new(rows: T, cols: T) -> Mat<T> {
         assert!(rows > T::zero(), "Number of rows must be greater than 0.");
@@ -62,11 +77,7 @@ where
             None => panic!("Multiplication overflow"),
         };
 
-        let num_elements_usize = match NumCast::from(num_elements) {
-            Some(result) => result,
-            None => panic!("Conversion to usize failed"),
-        };
-
+        let num_elements_usize = to_usize!(num_elements);
         let data_stream =
             Box::into_raw(vec![0u64; num_elements_usize].into_boxed_slice()) as *mut u64;
 
@@ -79,20 +90,21 @@ where
 
     pub fn print(&self, overwrite_padding: Option<usize>) {
         let padding = overwrite_padding.unwrap_or(4);
-        let rows_usize = self.rows.to_usize().expect("Conversion to usize failed for Rows");
-        let cols_usize = self.cols.to_usize().expect("Conversion to usize failed for Columns");
         
+        let rows_usize = to_usize!(self.rows);
+        let cols_usize = to_usize!(self.cols);
+
         println!("Mat ({} x {}):", rows_usize, cols_usize);
         println!("Memory location: {:?}", self.data_stream);
-    
+
         // Calculate the maximum number of digits in column indices
         let max_col_digits = self.cols.to_usize().unwrap().to_string().len();
-    
+
         unsafe {
             println!("[");
-            for i in 0..rows_usize {
+            for i in range!(0, rows_usize){
                 print!("{:padding$}", "", padding = padding);
-                for j in 0..cols_usize {
+                for j in range!(0, cols_usize) {
                     let value = *self.data_stream.add(i * cols_usize + j);
                     print!("{:<width$}", value, width = max_col_digits + padding);
                 }
@@ -101,20 +113,15 @@ where
             println!("]");
         }
     }
-    
 
     pub fn rand(&self, low: u64, high: u64) {
-        let rows_usize = match self.rows.to_usize() {
-            Some(rows_usize) => rows_usize,
-            _ => panic!("Conversion to usize failed for Rows"),
-        };
-        let cols_usize = match self.cols.to_usize() {
-            Some(cols_usize) => cols_usize,
-            _ => panic!("Conversion to usize failed for Columns"),
-        };
+        
+        let rows_usize = to_usize!(self.rows);
+        let cols_usize = to_usize!(self.cols);
+
         let mut rng = thread_rng();
-        for i in 0..rows_usize {
-            for j in 0..cols_usize {
+        for i in range!(0, rows_usize) {
+            for j in range!(0, cols_usize) {
                 let random_value = rng.gen_range(low..=high);
                 let index = i * self.cols.to_usize().unwrap() + j;
                 unsafe {
@@ -130,12 +137,12 @@ where
         usize: NumCast,
     {
         let num_elements = self.rows * self.cols;
-        let num_elements_usize = NumCast::from(num_elements).expect("Conversion to usize failed");
+        let num_elements_usize = to_usize!(num_elements);
         let value_u64 = NumCast::from(value).expect("Conversion to u64 failed");
 
         unsafe {
             let data_stream = std::slice::from_raw_parts_mut(self.data_stream, num_elements_usize);
-            for i in 0..num_elements_usize {
+            for i in range!(0, num_elements_usize) {
                 *data_stream.get_unchecked_mut(i) = value_u64;
             }
         }
@@ -145,14 +152,8 @@ where
     where
         T: FromPrimitive + PrimInt + Copy + PartialOrd + std::fmt::Display,
     {
-        let rows_usize = match self.rows.to_usize() {
-            Some(rows_usize) => rows_usize,
-            _ => panic!("Conversion to usize failed for Rows"),
-        };
-        let cols_usize = match self.cols.to_usize() {
-            Some(cols_usize) => cols_usize,
-            _ => panic!("Conversion to usize failed for Columns"),
-        };
+        let rows_usize = to_usize!(self.rows);
+        let cols_usize = to_usize!(self.cols);
         assert!(
             row < rows_usize,
             "Get failed! Supplied row Index {} is out of bounds. Matrix has {} rows.",
@@ -172,14 +173,9 @@ where
         }
     }
     pub fn set(&mut self, row: usize, col: usize, value: T) {
-        let rows_usize = match self.rows.to_usize() {
-            Some(rows_usize) => rows_usize,
-            _ => panic!("Conversion to usize failed for Rows"),
-        };
-        let cols_usize = match self.cols.to_usize() {
-            Some(cols_usize) => cols_usize,
-            _ => panic!("Conversion to usize failed for Columns"),
-        };
+        let rows_usize = to_usize!(self.rows);
+        let cols_usize = to_usize!(self.cols);
+
         assert!(
             row < rows_usize,
             "Set failed! Supplied row Index {} is out of bounds. Matrix has {} rows.",
@@ -208,7 +204,6 @@ where
             Vec::from_raw_parts(self.data_stream, 0, num_elements_usize);
         }
     }
-   
 }
 pub fn addition<T>(mat1: &Mat<T>, mat2: &Mat<T>) -> Mat<T>
 where
@@ -231,14 +226,8 @@ where
         mat2.rows,
         mat2.cols
     );
-    let rows_usize = match mat1.rows.to_usize() {
-        Some(rows_usize) => rows_usize,
-        _ => panic!("Conversion to usize failed for Rows"),
-    };
-    let cols_usize = match mat1.cols.to_usize() {
-        Some(cols_usize) => cols_usize,
-        _ => panic!("Conversion to usize failed for Columns"),
-    };
+    let rows_usize = to_usize!(mat1.rows);
+    let cols_usize = to_usize!(mat1.cols);
 
     let rows = mat1.rows;
     let cols = mat1.cols;
@@ -278,14 +267,8 @@ where
         mat2.cols
     );
 
-    let rows_usize = match mat1.rows.to_usize() {
-        Some(rows_usize) => rows_usize,
-        _ => panic!("Conversion to usize failed for Rows"),
-    };
-    let cols_usize = match mat1.cols.to_usize() {
-        Some(cols_usize) => cols_usize,
-        _ => panic!("Conversion to usize failed for Columns"),
-    };
+    let rows_usize = to_usize!(mat1.rows);
+    let cols_usize = to_usize!(mat1.cols);
 
     let rows = mat1.rows;
     let cols = mat1.cols;
@@ -322,19 +305,9 @@ where
         // For Multiplications mat1 cols must match mat2 rows
         "For Multiplications Mat1 Cols:({}) must match Mat2 Rows: ({})! \n . Got Mat1: ({}x{}) and Mat2: ({}x{})", mat1.cols, mat2.rows, mat1.rows, mat1.cols, mat2.rows, mat2.cols
     );
-    let result_rows_usize = match mat1.rows.to_usize() {
-        Some(rows_usize) => rows_usize,
-        _ => panic!("Conversion to usize failed for Rows"),
-    };
-    let mat1_cols_usize = match mat1.cols.to_usize() {
-        Some(rows_usize) => rows_usize,
-        _ => panic!("Conversion to usize failed for Rows"),
-    };
-    let result_cols_usize = match mat2.cols.to_usize() {
-        Some(cols_usize) => cols_usize,
-        _ => panic!("Conversion to usize failed for Columns"),
-    };
-
+    let result_rows_usize = to_usize!(mat1.rows);
+    let mat1_cols_usize = to_usize!(mat1.cols);
+    let result_cols_usize = to_usize!(mat2.cols);
     let rows = mat1.rows;
     let cols = mat2.cols;
     let mut result = Mat::new(rows, cols);
