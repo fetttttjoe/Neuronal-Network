@@ -1,10 +1,12 @@
-use num_traits::{CheckedMul, FromPrimitive, NumCast, ToPrimitive, Zero};
+use num_traits::{CheckedMul, PrimInt, FromPrimitive, NumCast, Zero};
 use rand::{thread_rng, Rng};
 use std::cmp::PartialOrd;
+use std::default::Default;
 use std::fmt::Display;
 use std::ops::Add;
 use std::ops::Mul;
-use std::default::Default;
+use std::ops::Sub;
+
 macro_rules! ternary {
     ($condition:expr, $true_expr:expr, $false_expr:expr) => {
         if $condition {
@@ -22,18 +24,14 @@ macro_rules! safe_get {
             None => {
                 // Handle the error case (get() returned an error)
 
-                println!(
-                    "Error: Failed to Get Value for Index ({}, {}).",
-                    $i, $j
-                );
+                println!("Error: Failed to Get Value for Index ({}, {}).", $i, $j);
                 continue; // We mainly use that in loops, so we continue to the next iteration
             }
         }
     };
 }
 
-
-pub struct Mat<T: ToPrimitive> {
+pub struct Mat<T: PrimInt> {
     pub rows: T,
     pub cols: T,
     pub data_stream: *mut u64,
@@ -41,12 +39,7 @@ pub struct Mat<T: ToPrimitive> {
 
 impl<T> Mat<T>
 where
-    T: CheckedMul
-        + NumCast
-        + Zero
-        + PartialOrd
-        + Mul<Output = T>
-        + Copy,
+    T: CheckedMul+ PrimInt + NumCast + Zero + PartialOrd + Mul<Output = T> + Copy,
 {
     pub fn new(rows: T, cols: T) -> Mat<T> {
         assert!(rows > T::zero(), "Number of rows must be greater than 0.");
@@ -84,9 +77,8 @@ where
             Some(cols_usize) => cols_usize,
             _ => panic!("Conversion to usize failed for Columns"),
         };
-        println!("Mat ({} x {}):", rows_usize, cols_usize);
+        println!("Mat:({} x {}):", rows_usize, cols_usize);
         println!("Memory location: {:?}", self.data_stream);
-
         // Calculate the maximum number of digits in column indices
         let max_col_digits = self.cols.to_usize().unwrap().to_string().len();
 
@@ -144,7 +136,7 @@ where
 
     pub fn get(&self, row: usize, col: usize) -> Option<T>
     where
-        T: ToPrimitive + FromPrimitive + Copy + PartialOrd + std::fmt::Display,
+        T: FromPrimitive + PrimInt + Copy + PartialOrd + std::fmt::Display,
     {
         let rows_usize = match self.rows.to_usize() {
             Some(rows_usize) => rows_usize,
@@ -202,7 +194,7 @@ where
 }
 impl<T> Default for Mat<T>
 where
-    T: ToPrimitive + Zero,
+    T: PrimInt + Zero,
 {
     fn default() -> Self {
         Mat {
@@ -222,11 +214,16 @@ where
         + num_traits::CheckedMul
         + PartialOrd
         + Display
-        + num_traits::FromPrimitive,
+        + FromPrimitive
+        + PrimInt,
 {
     assert!(
         mat1.rows == mat2.rows && mat1.cols == mat2.cols,
-        "Matrix dimensions must match. Got Mat1: ({}x{}) and Mat2: ({}x{})", mat1.rows, mat1.cols, mat2.rows, mat2.cols
+        "Matrix dimensions must match. Got Mat1: ({}x{}) and Mat2: ({}x{})",
+        mat1.rows,
+        mat1.cols,
+        mat2.rows,
+        mat2.cols
     );
     let rows_usize = match mat1.rows.to_usize() {
         Some(rows_usize) => rows_usize,
@@ -253,6 +250,53 @@ where
 
     return result;
 }
+pub fn subtraction<T>(mat1: &Mat<T>, mat2: &Mat<T>) -> Mat<T>
+where
+    T: Copy
+        + Sub<Output = T>
+        + PartialEq
+        + NumCast
+        + num_traits::Zero
+        + num_traits::CheckedMul
+        + PartialOrd
+        + Display
+        + PrimInt
+        + FromPrimitive,
+{
+    assert!(
+        mat1.rows == mat2.rows && mat1.cols == mat2.cols,
+        "Matrix dimensions must match. Got Mat1: ({}x{}) and Mat2: ({}x{})",
+        mat1.rows,
+        mat1.cols,
+        mat2.rows,
+        mat2.cols
+    );
+
+    let rows_usize = match mat1.rows.to_usize() {
+        Some(rows_usize) => rows_usize,
+        _ => panic!("Conversion to usize failed for Rows"),
+    };
+    let cols_usize = match mat1.cols.to_usize() {
+        Some(cols_usize) => cols_usize,
+        _ => panic!("Conversion to usize failed for Columns"),
+    };
+
+    let rows = mat1.rows;
+    let cols = mat1.cols;
+    let mut result = Mat::new(rows, cols);
+
+    for i in 0..rows_usize {
+        for j in 0..cols_usize {
+            let value1 = safe_get!(mat1, i, j);
+            let value2 = safe_get!(mat2, i, j);
+            let diff = value1.sub(value2);
+            result.set(i, j, diff);
+        }
+    }
+
+    result
+}
+
 pub fn dot_product<T>(mat1: &Mat<T>, mat2: &Mat<T>) -> Mat<T>
 where
     T: Copy
@@ -263,8 +307,9 @@ where
         + num_traits::CheckedMul
         + PartialOrd
         + Display
-        + num_traits::FromPrimitive
-        +Default,
+        + PrimInt
+        + FromPrimitive
+        + Default,
 {
     assert!(
         mat1.rows == mat2.cols && mat1.cols == mat2.rows,
@@ -302,7 +347,7 @@ where
 
     return result;
 }
-impl<T: ToPrimitive> Drop for Mat<T> {
+impl<T: PrimInt> Drop for Mat<T> {
     fn drop(&mut self) {
         let num_elements_usize = match (self.rows.to_usize(), self.cols.to_usize()) {
             (Some(rows_usize), Some(cols_usize)) => rows_usize * cols_usize,
