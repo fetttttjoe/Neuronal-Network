@@ -1,6 +1,15 @@
-mod matrix;
-use matrix::Mat;
-
+#[path = "../matrix/matrix.rs"] mod matrix;
+use matrix::Mat as Mat;
+// I dont understand why sharing is broken now.
+// So I had to copy the macro code from matrix.rs
+macro_rules! to_usize {
+  ($value:expr) => {
+    match $value.to_usize() {
+      Some(result) => result,
+      _ => panic!("Conversion to usize failed"),
+    }
+  };
+}
 #[cfg(test)]
 mod tests {
   use num_traits::ToPrimitive;

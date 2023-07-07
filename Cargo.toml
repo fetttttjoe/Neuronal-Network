@@ -7,9 +7,10 @@ edition = "2021"
 
 [dependencies]
 num-traits = "0.2"
+libc = "0.2"
 rand = "0.8"
 
 
 [[test]]
 name = "matrix_tests"
-path = "src/matrix_tests.rs"
+path = "src/tests/matrix_tests.rs"

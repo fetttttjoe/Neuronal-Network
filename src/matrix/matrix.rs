@@ -6,7 +6,6 @@ use std::fmt::Display;
 use std::ops::Add;
 use std::ops::Mul;
 use std::ops::Sub;
-
 macro_rules! ternary {
   ($condition:expr, $true_expr:expr, $false_expr:expr) => {
     if $condition {
@@ -29,8 +28,6 @@ macro_rules! safe_get {
     }
   };
 }
-
-#[macro_export]
 macro_rules! to_usize {
   ($value:expr) => {
     match $value.to_usize() {
@@ -81,7 +78,7 @@ where
     let num_elements_usize = to_usize!(num_elements);
     let data_stream = Box::into_raw(vec![0u64; num_elements_usize].into_boxed_slice()) as *mut u64;
 
-    Mat {
+    return Mat {
       rows,
       cols,
       data_stream,
@@ -122,7 +119,7 @@ where
     for i in range!(0, rows_usize) {
       for j in range!(0, cols_usize) {
         let random_value = rng.gen_range(low..=high);
-        let index = i * self.cols.to_usize().unwrap() + j;
+        let index = i * to_usize!(self.cols) + j;
         unsafe {
           *self.data_stream.add(index) = random_value;
         }
