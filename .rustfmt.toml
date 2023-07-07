@@ -1,0 +1,5 @@
+# Specify the maximum line length
+max_width = 100
+
+# Indentation settings
+tab_spaces = 2
