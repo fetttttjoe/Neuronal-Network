@@ -44,7 +44,7 @@ macro_rules! range {
 pub struct Mat<T> {
   pub rows: T,
   pub cols: T,
-  pub data_stream: *mut u64,
+  pub data_stream: *mut f64,
 }
 impl<T> Default for Mat<T>
 where
@@ -74,7 +74,7 @@ where
     };
 
     let num_elements_usize = to_usize!(num_elements);
-    let data_stream = Box::into_raw(vec![0u64; num_elements_usize].into_boxed_slice()) as *mut u64;
+    let data_stream = Box::into_raw(vec![0u64; num_elements_usize].into_boxed_slice()) as *mut f64;
 
     return Mat {
       rows,
@@ -83,14 +83,26 @@ where
     };
   }
 
-  pub fn print(&self, overwrite_padding: Option<usize>) {
+  pub fn print(&self, overwrite_padding: Option<usize>, overwrite_precision: Option<usize>) {
     let padding = overwrite_padding.unwrap_or(4);
+    let precision = overwrite_precision.unwrap_or(4);
 
     let rows_usize = to_usize!(self.rows);
     let cols_usize = to_usize!(self.cols);
 
-    println!("{:padding$}Mat ({} x {}):","", rows_usize, cols_usize, padding = padding);
-    println!("{:padding$}Memory location: {:?}","", self.data_stream,  padding = padding);
+    println!(
+      "{:padding$}Mat ({} x {}):",
+      "",
+      rows_usize,
+      cols_usize,
+      padding = padding
+    );
+    println!(
+      "{:padding$}Memory location: {:?}",
+      "",
+      self.data_stream,
+      padding = padding
+    );
 
     // Calculate the maximum number of digits in column indices
     let max_col_digits = self.cols.to_usize().unwrap().to_string().len();
@@ -101,7 +113,13 @@ where
         print!("{:padding$}", "", padding = padding + padding);
         for j in range!(0, cols_usize) {
           let value = *self.data_stream.add(i * cols_usize + j);
-          print!("{:<width$}", value, width = (max_col_digits + padding + padding));
+          let value_f64: f64 = NumCast::from(value).expect("Conversion to f64 failed");
+          print!(
+            "{:<width$.precision$}",
+            value_f64,
+            width = (max_col_digits + padding * 3),
+            precision = precision
+          );
         }
         println!();
       }
@@ -109,7 +127,7 @@ where
     }
   }
 
-  pub fn rand(&self, low: u64, high: u64) {
+  pub fn rand(&self, low: f64, high: f64) {
     let rows_usize = to_usize!(self.rows);
     let cols_usize = to_usize!(self.cols);
 
@@ -163,7 +181,7 @@ where
     let index = row * cols_usize + col;
     unsafe {
       let value = *self.data_stream.add(index);
-      return Some(FromPrimitive::from_u64(value).unwrap());
+      return Some(FromPrimitive::from_f64(value).unwrap());
     }
   }
   pub fn set(&mut self, row: usize, col: usize, value: T) {
@@ -185,7 +203,7 @@ where
 
     let index = row * cols_usize + col;
     unsafe {
-      *self.data_stream.add(index) = value.to_u64().expect("Conversion to u64 failed");
+      *self.data_stream.add(index) = value.to_f64().expect("Conversion to u64 failed");
     }
   }
   fn drop(&mut self) {

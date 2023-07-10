@@ -1,5 +1,6 @@
-#[path = "../matrix/matrix.rs"] mod matrix;
-use matrix::Mat as Mat;
+#[path = "../matrix/matrix.rs"]
+mod matrix;
+use matrix::Mat;
 // I dont understand why sharing is broken now.
 // So I had to copy the macro code from matrix.rs
 macro_rules! to_usize {
@@ -214,8 +215,8 @@ mod tests {
     // Create a matrix
     let mat = Mat::new(rows, cols);
 
-    let low = 0;
-    let high = 9;
+    let low = 0.0;
+    let high = 9.0;
     // Call the rand() function
     mat.rand(low, high);
 

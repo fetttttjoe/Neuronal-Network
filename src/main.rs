@@ -1,16 +1,18 @@
-#[path = "matrix/matrix.rs"] mod matrix;
-#[path = "network/network.rs"] mod network;
-use matrix::Mat as Mat;
-use crate::network::Network;
+#[path = "matrix/matrix.rs"]
+mod matrix;
+#[path = "network/network.rs"]
+mod network;
 use crate::matrix::addition;
-use crate::matrix::subtraction;
 use crate::matrix::dot_product;
+use crate::matrix::subtraction;
+use crate::network::Network;
+use matrix::Mat;
 fn main() {
-  let mut n =  Mat::new(15, 20);
+  // let mut n =  Mat::new(15, 20);
   // let mut m =  Mat::new(15, 20);
   // n.fill(10);
   // m.fill(10);
-  
+
   // // subsctraction
   // let sub = subtraction(&n, &m);
   // println!("All 0");
@@ -31,5 +33,6 @@ fn main() {
   // multiply.print(None);
   // println!("----------------------------------------------");
   let mut network = network::Network::new(&[2, 2, 1]);
-  network.print(None);
+  network.rand(0.0, 1.0);
+  network.print(Some(5), Some(10));
 }

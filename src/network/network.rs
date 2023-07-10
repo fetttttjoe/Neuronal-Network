@@ -62,29 +62,38 @@ impl Network {
     unsafe { std::slice::from_raw_parts(self.activations, self.count + 1) }
   }
 
-  pub fn print(&self, overwrite_padding: Option<usize>) {
+  pub fn print(&self, overwrite_padding: Option<usize>, overwrite_precision: Option<usize>) {
     let padding = overwrite_padding.unwrap_or(4);
+    let precision = overwrite_precision.unwrap_or(4);
 
     println!("Network: ");
     println!("[",);
     for i in 0..self.count {
-        print!("{:padding$}", "", padding = padding);
-        unsafe {
-            println!("{:padding$}weights[{}]: ", "", i, padding = padding / 2);
-            println!("{:padding$}[", "", padding=padding / 2);
-            (*self.weights.add(i)).print(Some(padding));
-            println!("{:padding$}]", "", padding=padding / 2);
-        }
-        unsafe {
-            println!("{:padding$}bias[{}]: ", "", i, padding = padding / 2);
-            println!("{:padding$}[", "", padding=padding / 2);
-            (*self.bias.add(i)).print(Some(padding));
-            println!("{:padding$}]", "", padding=padding / 2);
-        }
+      print!("{:padding$}", "", padding = padding);
+      unsafe {
+        println!("{:padding$}weights[{}]: ", "", i, padding = padding / 2);
+        println!("{:padding$}[", "", padding = padding / 2);
+        (*self.weights.add(i)).print(Some(padding), Some(precision));
+        println!("{:padding$}]", "", padding = padding / 2);
+      }
+      unsafe {
+        println!("{:padding$}bias[{}]: ", "", i, padding = padding / 2);
+        println!("{:padding$}[", "", padding = padding / 2);
+        (*self.bias.add(i)).print(Some(padding), Some(precision));
+        println!("{:padding$}]", "", padding = padding / 2);
+      }
     }
     println!("]");
-}
+  }
 
+  pub fn rand(&mut self, low: f64, high: f64) {
+    for i in 0..self.count {
+      unsafe {
+        (*self.weights.add(i)).rand(low, high);
+        (*self.bias.add(i)).rand(low, high);
+      }
+    }
+  }
 
   fn drop(&mut self) {
     let mut weights = unsafe { Vec::from_raw_parts(self.weights, self.count, self.count) };
