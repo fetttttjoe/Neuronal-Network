@@ -30,6 +30,6 @@ fn main() {
   // println!("All 6");
   // multiply.print(None);
   // println!("----------------------------------------------");
-  let mut network = network::Network::new(&[28*28, 16, 16, 10]);
-  network.print();
+  let mut network = network::Network::new(&[2, 2, 1]);
+  network.print(None);
 }

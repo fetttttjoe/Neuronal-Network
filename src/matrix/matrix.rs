@@ -3,9 +3,7 @@ use rand::{thread_rng, Rng};
 use std::cmp::PartialOrd;
 use std::default::Default;
 use std::fmt::Display;
-use std::ops::Add;
-use std::ops::Mul;
-use std::ops::Sub;
+use std::ops::{Add, Mul, Sub};
 macro_rules! ternary {
   ($condition:expr, $true_expr:expr, $false_expr:expr) => {
     if $condition {
@@ -62,7 +60,7 @@ where
 }
 impl<T> Mat<T>
 where
-  T: CheckedMul + PrimInt + NumCast + Zero + PartialOrd + Mul<Output = T> + Copy,
+  T: CheckedMul + PrimInt + NumCast + Zero + PartialOrd + Mul<Output = T>,
 {
   pub fn new(rows: T, cols: T) -> Mat<T> {
     assert!(rows > T::zero(), "Number of rows must be greater than 0.");
@@ -82,7 +80,7 @@ where
       rows,
       cols,
       data_stream,
-    }
+    };
   }
 
   pub fn print(&self, overwrite_padding: Option<usize>) {
@@ -91,23 +89,23 @@ where
     let rows_usize = to_usize!(self.rows);
     let cols_usize = to_usize!(self.cols);
 
-    println!("Mat ({} x {}):", rows_usize, cols_usize);
-    println!("Memory location: {:?}", self.data_stream);
+    println!("{:padding$}Mat ({} x {}):","", rows_usize, cols_usize, padding = padding);
+    println!("{:padding$}Memory location: {:?}","", self.data_stream,  padding = padding);
 
     // Calculate the maximum number of digits in column indices
     let max_col_digits = self.cols.to_usize().unwrap().to_string().len();
 
     unsafe {
-      println!("[");
+      println!("{:padding$}[", "", padding = padding);
       for i in range!(0, rows_usize) {
-        print!("{:padding$}", "", padding = padding);
+        print!("{:padding$}", "", padding = padding + padding);
         for j in range!(0, cols_usize) {
           let value = *self.data_stream.add(i * cols_usize + j);
-          print!("{:<width$}", value, width = max_col_digits + padding);
+          print!("{:<width$}", value, width = (max_col_digits + padding + padding));
         }
         println!();
       }
-      println!("]");
+      println!("{:padding$}]", "", padding = padding);
     }
   }
 
@@ -129,7 +127,7 @@ where
 
   pub fn fill(&mut self, value: T)
   where
-    T: Copy + NumCast,
+    T: NumCast,
     usize: NumCast,
   {
     let num_elements = self.rows * self.cols;
@@ -203,12 +201,11 @@ where
 }
 pub fn addition<T>(mat1: &Mat<T>, mat2: &Mat<T>) -> Mat<T>
 where
-  T: Copy
-    + Add<Output = T>
+  T: Add<Output = T>
     + PartialEq
     + NumCast
-    + num_traits::Zero
-    + num_traits::CheckedMul
+    + Zero
+    + CheckedMul
     + PartialOrd
     + Display
     + FromPrimitive
@@ -243,12 +240,11 @@ where
 }
 pub fn subtraction<T>(mat1: &Mat<T>, mat2: &Mat<T>) -> Mat<T>
 where
-  T: Copy
-    + Sub<Output = T>
+  T: Sub<Output = T>
     + PartialEq
     + NumCast
-    + num_traits::Zero
-    + num_traits::CheckedMul
+    + Zero
+    + CheckedMul
     + PartialOrd
     + Display
     + PrimInt
@@ -284,12 +280,11 @@ where
 
 pub fn dot_product<T>(mat1: &Mat<T>, mat2: &Mat<T>) -> Mat<T>
 where
-  T: Copy
-    + Add<Output = T>
+  T: Add<Output = T>
     + PartialEq
     + NumCast
-    + num_traits::Zero
-    + num_traits::CheckedMul
+    + Zero
+    + CheckedMul
     + PartialOrd
     + Display
     + PrimInt

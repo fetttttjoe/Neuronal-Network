@@ -14,3 +14,7 @@ rand = "0.8"
 [[test]]
 name = "matrix_tests"
 path = "src/tests/matrix_tests.rs"
+
+[[test]]
+name = "network_tests"
+path = "src/tests/network_tests.rs"
