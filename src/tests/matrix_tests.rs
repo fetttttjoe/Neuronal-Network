@@ -27,31 +27,31 @@ mod tests {
   #[test]
   fn test_set_and_get() {
     let mut mat: Mat<u32> = Mat::new(2, 2);
-    mat.set(0, 0, 1);
-    mat.set(0, 1, 2);
-    mat.set(1, 0, 3);
-    mat.set(1, 1, 4);
+    mat.set(0, 0, 1.0);
+    mat.set(0, 1, 2.0);
+    mat.set(1, 0, 3.0);
+    mat.set(1, 1, 4.0);
 
-    assert_eq!(mat.get(0, 0), Some(1));
-    assert_eq!(mat.get(0, 1), Some(2));
-    assert_eq!(mat.get(1, 0), Some(3));
-    assert_eq!(mat.get(1, 1), Some(4));
+    assert_eq!(mat.get(0, 0), Some(1.0));
+    assert_eq!(mat.get(0, 1), Some(2.0));
+    assert_eq!(mat.get(1, 0), Some(3.0));
+    assert_eq!(mat.get(1, 1), Some(4.0));
   }
 
   #[test]
   fn test_mat_get_in_bound() {
     let mut mat: Mat<i32> = Mat::new(3, 3);
-    mat.set(1, 1, 42);
+    mat.set(1, 1, 42.0);
     let value = mat.get(1, 1);
-    assert_eq!(value, Some(42));
+    assert_eq!(value, Some(42.0));
   }
 
   #[test]
   fn test_mat_set_in_bound() {
     let mut mat: Mat<i32> = Mat::new(3, 3);
-    mat.set(1, 1, 42);
+    mat.set(1, 1, 42.0);
     let value = mat.get(1, 1);
-    assert_eq!(value, Some(42));
+    assert_eq!(value, Some(42.0));
   }
 
   #[test]
@@ -60,7 +60,7 @@ mod tests {
   )]
   fn test_mat_set_out_of_bounds_row() {
     let mut mat: Mat<i32> = Mat::new(3, 3);
-    mat.set(5, 2, 42);
+    mat.set(5, 2, 42.0);
   }
 
   #[test]
@@ -69,7 +69,7 @@ mod tests {
   )]
   fn test_mat_set_out_of_bounds_column() {
     let mut mat: Mat<i32> = Mat::new(3, 3);
-    mat.set(2, 5, 42);
+    mat.set(2, 5, 42.0);
   }
 
   #[test]
@@ -95,10 +95,10 @@ mod tests {
     let mut mat: Mat<u32> = Mat::new(2, 2);
     mat.fill(5);
 
-    assert_eq!(mat.get(0, 0), Some(5));
-    assert_eq!(mat.get(0, 1), Some(5));
-    assert_eq!(mat.get(1, 0), Some(5));
-    assert_eq!(mat.get(1, 1), Some(5));
+    assert_eq!(mat.get(0, 0), Some(5.0));
+    assert_eq!(mat.get(0, 1), Some(5.0));
+    assert_eq!(mat.get(1, 0), Some(5.0));
+    assert_eq!(mat.get(1, 1), Some(5.0));
   }
 
   #[test]
@@ -175,10 +175,10 @@ mod tests {
 
     // Expected result
     let mut expected = Mat::new(2, 2);
-    expected.set(0, 0, 18);
-    expected.set(0, 1, 18);
-    expected.set(1, 0, 18);
-    expected.set(1, 1, 18);
+    expected.set(0, 0, 18.0);
+    expected.set(0, 1, 18.0);
+    expected.set(1, 0, 18.0);
+    expected.set(1, 1, 18.0);
 
     // Compare the actual result with the expected result
     assert_eq!(result.rows, expected.rows);
@@ -225,7 +225,7 @@ mod tests {
       for j in 0..cols {
         let value = mat.get(i, j).unwrap();
         assert!(
-          value >= low.to_usize().unwrap() && value <= high.to_usize().unwrap(),
+          value >= low && value <= high,
           "Element at ({}, {}) is out of range",
           i,
           j

@@ -1,3 +1,5 @@
+#[path = "../util/functions.rs"]
+mod functions;
 use num_traits::{CheckedMul, FromPrimitive, NumCast, PrimInt, Zero};
 use rand::{thread_rng, Rng};
 use std::cmp::PartialOrd;
@@ -83,6 +85,17 @@ where
     };
   }
 
+  pub fn sigmoid(&mut self) {
+    for i in range!(0, to_usize!(self.rows)) {
+      for j in range!(0,to_usize!(self.cols)) {
+        let value = safe_get!(self, i, j);
+        let value_f64: f64 = NumCast::from(value).expect("Conversion to f64 failed");
+        let sigmoid = functions::sigmoid(value_f64);
+        self.set(i, j, sigmoid);
+      }
+    }
+  }
+
   pub fn print(&self, overwrite_padding: Option<usize>, overwrite_precision: Option<usize>) {
     let padding = overwrite_padding.unwrap_or(4);
     let precision = overwrite_precision.unwrap_or(4);
@@ -117,7 +130,7 @@ where
           print!(
             "{:<width$.precision$}",
             value_f64,
-            width = (max_col_digits + padding * 3),
+            width = (max_col_digits + padding + precision),
             precision = precision
           );
         }
@@ -160,9 +173,9 @@ where
     }
   }
 
-  pub fn get(&self, row: usize, col: usize) -> Option<T>
+  pub fn get(&self, row: usize, col: usize) -> Option<f64>
   where
-    T: FromPrimitive + PrimInt + Copy + PartialOrd + std::fmt::Display,
+    T: PrimInt + Copy + PartialOrd,
   {
     let rows_usize = to_usize!(self.rows);
     let cols_usize = to_usize!(self.cols);
@@ -184,7 +197,8 @@ where
       return Some(FromPrimitive::from_f64(value).unwrap());
     }
   }
-  pub fn set(&mut self, row: usize, col: usize, value: T) {
+  pub fn set(&mut self, row: usize, col: usize, value: f64) 
+  {
     let rows_usize = to_usize!(self.rows);
     let cols_usize = to_usize!(self.cols);
 
@@ -203,7 +217,7 @@ where
 
     let index = row * cols_usize + col;
     unsafe {
-      *self.data_stream.add(index) = value.to_f64().expect("Conversion to u64 failed");
+      *self.data_stream.add(index) = value;
     }
   }
   fn drop(&mut self) {
@@ -226,7 +240,6 @@ where
     + CheckedMul
     + PartialOrd
     + Display
-    + FromPrimitive
     + PrimInt,
 {
   assert!(
@@ -266,7 +279,6 @@ where
     + PartialOrd
     + Display
     + PrimInt
-    + FromPrimitive,
 {
   assert!(
     mat1.rows == mat2.rows && mat1.cols == mat2.cols,
@@ -306,11 +318,10 @@ where
     + PartialOrd
     + Display
     + PrimInt
-    + FromPrimitive
     + Default,
 {
   assert!(
-        mat1.rows == mat2.cols && mat1.cols == mat2.rows,
+        mat1.cols == mat2.rows,
         // For Multiplications mat1 cols must match mat2 rows
         "For Multiplications Mat1 Cols:({}) must match Mat2 Rows: ({})! \n . Got Mat1: ({}x{}) and Mat2: ({}x{})", mat1.cols, mat2.rows, mat1.rows, mat1.cols, mat2.rows, mat2.cols
     );
@@ -323,7 +334,7 @@ where
 
   for i in 0..result_rows_usize {
     for j in 0..result_cols_usize {
-      let mut sum = T::default();
+      let mut sum = 0.0;
       for k in 0..mat1_cols_usize {
         let value1 = safe_get!(mat1, i, k);
         let value2 = safe_get!(mat2, k, j);

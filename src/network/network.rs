@@ -61,6 +61,16 @@ impl Network {
   pub fn get_activations(&self) -> &[Mat<usize>] {
     unsafe { std::slice::from_raw_parts(self.activations, self.count + 1) }
   }
+  pub fn forward(&self){
+    for i in 0..self.count {
+      unsafe {
+        let dot = matrix::dot_product(&(*self.activations.add(i)), &(*self.weights.add(i)));
+        *self.activations.add(i + 1) = dot;
+        *self.activations.add(i + 1) = matrix::addition(&(*self.activations.add(i + 1)), &(*self.bias.add(i)));
+        (*self.activations.add(i + 1)).sigmoid();
+      }
+    }
+  }
 
   pub fn print(&self, overwrite_padding: Option<usize>, overwrite_precision: Option<usize>) {
     let padding = overwrite_padding.unwrap_or(4);
@@ -69,7 +79,6 @@ impl Network {
     println!("Network: ");
     println!("[",);
     for i in 0..self.count {
-      print!("{:padding$}", "", padding = padding);
       unsafe {
         println!("{:padding$}weights[{}]: ", "", i, padding = padding / 2);
         println!("{:padding$}[", "", padding = padding / 2);
@@ -85,7 +94,6 @@ impl Network {
     }
     println!("]");
   }
-
   pub fn rand(&mut self, low: f64, high: f64) {
     for i in 0..self.count {
       unsafe {

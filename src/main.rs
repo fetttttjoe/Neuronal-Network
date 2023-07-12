@@ -9,10 +9,12 @@ use crate::network::Network;
 use matrix::Mat;
 fn main() {
   // let mut n =  Mat::new(15, 20);
-  // let mut m =  Mat::new(15, 20);
+  let mut m =  Mat::new(3, 3);
   // n.fill(10);
-  // m.fill(10);
-
+  m.rand(1.0, 10.0);
+  m.print(None, Some(30));
+  m.sigmoid();
+  m.print(None, Some(30));
   // // subsctraction
   // let sub = subtraction(&n, &m);
   // println!("All 0");
@@ -35,4 +37,6 @@ fn main() {
   let mut network = network::Network::new(&[2, 2, 1]);
   network.rand(0.0, 1.0);
   network.print(Some(5), Some(10));
+  network.forward();
+  network.print(None, Some(30))
 }
