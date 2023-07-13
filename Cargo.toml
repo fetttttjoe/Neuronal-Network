@@ -9,7 +9,12 @@ edition = "2021"
 num-traits = "0.2"
 libc = "0.2"
 rand = "0.8"
+num = "0.4"
 
+
+[lib]
+namer = "matrix"
+path = "src/matrix.rs" # Path to the main library module
 
 [[test]]
 name = "matrix_tests"

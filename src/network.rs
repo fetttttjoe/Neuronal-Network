@@ -1,14 +1,12 @@
-#[path = "../matrix/matrix.rs"]
-mod matrix;
 
-use matrix::Mat;
+use nn::matrix::*; 
 use std::ptr;
 
 pub struct Network {
   pub count: usize,
-  pub weights: *mut Mat<usize>,
-  pub bias: *mut Mat<usize>,
-  pub activations: *mut Mat<usize>,
+  pub weights: *mut Mat,
+  pub bias: *mut Mat,
+  pub activations: *mut Mat,
 }
 
 impl Network {
@@ -23,9 +21,9 @@ impl Network {
       activations: ptr::null_mut(),
     };
 
-    let mut weights: Vec<Mat<usize>> = Vec::with_capacity(nn.count);
-    let mut bias: Vec<Mat<usize>> = Vec::with_capacity(nn.count);
-    let mut activations: Vec<Mat<usize>> = Vec::with_capacity(nn.count + 1);
+    let mut weights: Vec<Mat> = Vec::with_capacity(nn.count);
+    let mut bias: Vec<Mat> = Vec::with_capacity(nn.count);
+    let mut activations: Vec<Mat> = Vec::with_capacity(nn.count + 1);
 
     for i in 0..nn.count {
       let weights_mat = Mat::new(arch[i], arch[i + 1]);
@@ -46,27 +44,28 @@ impl Network {
     std::mem::forget(bias);
     std::mem::forget(activations);
 
-    nn
+    return nn;
   }
   // ... existing code
 
-  pub fn get_weights(&self) -> &[Mat<usize>] {
-    unsafe { std::slice::from_raw_parts(self.weights, self.count) }
+  pub fn get_weights(&self) -> Vec<Mat> {
+    unsafe { return std::slice::from_raw_parts(self.weights, self.count).to_vec(); }
   }
 
-  pub fn get_bias(&self) -> &[Mat<usize>] {
-    unsafe { std::slice::from_raw_parts(self.bias, self.count) }
+  pub fn get_bias(&self) ->  Vec<Mat> {
+    unsafe { return std::slice::from_raw_parts(self.bias, self.count).to_vec(); }
   }
 
-  pub fn get_activations(&self) -> &[Mat<usize>] {
-    unsafe { std::slice::from_raw_parts(self.activations, self.count + 1) }
+  pub fn get_activations(&self) -> Vec<Mat> {
+    unsafe { return std::slice::from_raw_parts(self.activations, self.count + 1).to_vec(); }
   }
-  pub fn forward(&self){
+  pub fn forward(&mut self) {
     for i in 0..self.count {
       unsafe {
-        let dot = matrix::dot_product(&(*self.activations.add(i)), &(*self.weights.add(i)));
+        let dot = dot_product(&(*self.activations.add(i)), &(*self.weights.add(i)));
         *self.activations.add(i + 1) = dot;
-        *self.activations.add(i + 1) = matrix::addition(&(*self.activations.add(i + 1)), &(*self.bias.add(i)));
+        *self.activations.add(i + 1) =
+          addition(&(*self.activations.add(i + 1)), &(*self.bias.add(i)));
         (*self.activations.add(i + 1)).sigmoid();
       }
     }
@@ -82,13 +81,13 @@ impl Network {
       unsafe {
         println!("{:padding$}weights[{}]: ", "", i, padding = padding / 2);
         println!("{:padding$}[", "", padding = padding / 2);
-        (*self.weights.add(i)).print(Some(padding), Some(precision));
+        (*self.weights.add(i)).print("weights", Some(padding), Some(precision));
         println!("{:padding$}]", "", padding = padding / 2);
       }
       unsafe {
         println!("{:padding$}bias[{}]: ", "", i, padding = padding / 2);
         println!("{:padding$}[", "", padding = padding / 2);
-        (*self.bias.add(i)).print(Some(padding), Some(precision));
+        (*self.bias.add(i)).print("bias", Some(padding), Some(precision));
         println!("{:padding$}]", "", padding = padding / 2);
       }
     }

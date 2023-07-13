@@ -1,7 +1,6 @@
-#[path = "../network/network.rs"]
+#[path = "../network.rs"]
 mod network;
 use network::Network as NN;
-
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -67,6 +66,5 @@ mod tests {
       assert_eq!(activation_matrix.rows, 1);
       assert_eq!(activation_matrix.cols, arch[i + 1]);
     }
-   
   }
 }
