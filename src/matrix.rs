@@ -78,7 +78,7 @@ pub mod matrix {
         for i in range!(0, self.rows) {
           print!("{:padding$}", "", padding = padding * 2);
           for j in range!(0, self.cols) {
-            let value = *self.data_stream.add(j * self.rows + i);
+            let value = *self.data_stream.add(i * self.cols + j);
             let value_f64: f64 = NumCast::from(value).expect("Conversion to f64 failed");
             print!(
               "{:<width$.precision$}",

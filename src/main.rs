@@ -6,7 +6,11 @@ use crate::network::network::Network;
 fn main() {
   let stride = 3;
   let mut training_data: Vec<f64> =
-    vec![0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0];
+    vec![0.0, 0.0, 0.0,
+     0.0, 1.0, 1.0,
+      1.0, 0.0, 1.0,
+       1.0, 1.0, 0.0];
+       println!("data: {}", training_data.len());
   let n = size_of_element(&training_data, stride);
   println!("n: {}", n);
   let training_inputs = Mat {
@@ -29,7 +33,7 @@ fn main() {
   let mut network_activations_vec = network.get_activations();
   let mut network_activations = network_activations_vec.as_mut_slice();
   training_inputs.print("training_inputs", None, None);
-  let training_row = mat_row(&training_inputs, 1);
+  let training_row = mat_row(&training_inputs, 0);
   network_activations[0].print("activations", None, None);
   training_row.print("training_row", None, None);
   mat_copy(&mut network_activations[0], &training_row);
@@ -47,7 +51,5 @@ fn main() {
 }
 
 fn size_of_element<T>(vector: &[T], stride: usize) -> usize {
-  let element_size = mem::size_of_val(&vector[0]);
-  let vector_size = mem::size_of_val(&vector);
-  return vector_size / element_size / stride;
+  return vector.len() / stride;
 }
