@@ -1,17 +1,31 @@
-mod network;
-use nn::matrix::*; 
+mod network; // Include the network module
 use std::mem;
+use nn::matrix::*;
+
+use crate::network::network::Network;
 fn main() {
   let stride = 3;
-  let training_data: Vec<f32> = vec![0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0];
+  let mut training_data: Vec<f64> = vec![0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0];
   let n = size_of_element(&training_data, stride);
   println!("n: {}", n);
-  let training_inputs = Mat::new(n, 2);
-  let training_outputs = Mat::new(n, 1);
+  let training_inputs = Mat{
+    rows: n,
+    cols: 2,
+    stride: stride,
+    data_stream: training_data.as_mut_ptr(),
+  };
+  let training_outputs = Mat{
+    rows: n,
+    cols: 1,
+    stride: stride,
+    data_stream: unsafe {
+      training_data.as_mut_ptr().add(2)
+    },
+  };
   // training_inputs.print(None, None);
   // training_outputs.print(None, None);
   // let training_inputs = Mat::new()
-  let mut network = network::Network::new(&[2, 2, 1]);
+  let mut network = Network::new(&[2, 2, 1]);
   network.print(Some(5), Some(10));
   let mut network_activations_vec = network.get_activations();
   let mut network_activations = network_activations_vec.as_mut_slice();

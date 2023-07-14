@@ -1,32 +1,16 @@
-#[path = "util/functions.rs"]
+
+#[path = "utils/macros.rs"]
+mod macros;
+#[path = "utils/functions.rs"]
 mod functions;
-macro_rules! safe_get {
-  ($mat:expr, $i:expr, $j:expr) => {
-    match $mat.get($i, $j) {
-      Some(value) => value,
-      None => {
-        // Handle the error case (get() returned an error)
-        println!("Error: Failed to Get Value for Index ({}, {}).", $i, $j);
-        continue; // We mainly use that in loops, so we continue to the next iteration
-      }
-    }
-  };
-}
-
-macro_rules! range {
-  ($start:expr, $end:expr) => {
-    ($start..$end)
-  };
-}
-
 pub mod matrix {
-
   use num_traits::NumCast;
   use rand::{thread_rng, Rng};
+  use crate::*;
+
   use std::ops::Sub;
 
-  use super::functions;
-
+  use super::functions::sigmoid;
   #[derive(Clone)]
   pub struct Mat {
     pub rows: usize,
@@ -57,7 +41,7 @@ pub mod matrix {
       for i in range!(0, (self.rows)) {
         for j in range!(0, (self.cols)) {
           let value_f64: f64 = safe_get!(self, i, j);
-          let sigmoid = functions::sigmoid(value_f64);
+          let sigmoid = sigmoid(value_f64);
           self.set(i, j, sigmoid);
         }
       }
@@ -95,7 +79,7 @@ pub mod matrix {
         for i in range!(0, self.rows) {
           print!("{:padding$}", "", padding = padding * 2);
           for j in range!(0, self.cols) {
-            let value = *self.data_stream.add(i * self.cols + j);
+            let value = *self.data_stream.add(j * self.rows + i);
             let value_f64: f64 = NumCast::from(value).expect("Conversion to f64 failed");
             print!(
               "{:<width$.precision$}",

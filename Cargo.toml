@@ -11,7 +11,6 @@ libc = "0.2"
 rand = "0.8"
 num = "0.4"
 
-
 [lib]
 namer = "matrix"
 path = "src/matrix.rs" # Path to the main library module

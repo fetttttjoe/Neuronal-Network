@@ -1,9 +1,8 @@
 #[path = "../network.rs"]
 mod network;
-use network::Network as NN;
 #[cfg(test)]
 mod tests {
-  use super::*;
+    use crate::network::network::Network as NN;
 
   #[test]
   fn test_network_drop() {

@@ -1,30 +1,8 @@
-use nn::matrix::*; 
-// I dont understand why sharing is broken now.
-// So I had to copy the macro code from matrix.rs
-macro_rules! to_usize {
-  ($value:expr) => {
-    match $value.to_usize() {
-      Some(result) => result,
-      _ => panic!("Conversion to usize failed"),
-    }
-  };
-}
-macro_rules! safe_get {
-  ($mat:expr, $i:expr, $j:expr) => {
-    match $mat.get($i, $j) {
-      Some(value) => value,
-      None => {
-        // Handle the error case (get() returned an error)
-        println!("Error: Failed to Get Value for Index ({}, {}).", $i, $j);
-        continue; // We mainly use that in loops, so we continue to the next iteration
-      }
-    }
-  };
-}
+#[path = "../utils/macros.rs"]
+mod macros;
 #[cfg(test)]
 mod tests {
-  use num_traits::ToPrimitive;
-
+  use nn::matrix::{Mat, dot_product, addition, subtraction};
   use super::*;
 
   #[test]
