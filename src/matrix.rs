@@ -1,12 +1,11 @@
-
-#[path = "utils/macros.rs"]
-mod macros;
 #[path = "utils/functions.rs"]
 mod functions;
+#[path = "utils/macros.rs"]
+mod macros;
 pub mod matrix {
+  use crate::*;
   use num_traits::NumCast;
   use rand::{thread_rng, Rng};
-  use crate::*;
 
   use std::ops::Sub;
 

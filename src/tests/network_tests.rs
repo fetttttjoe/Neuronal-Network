@@ -2,7 +2,7 @@
 mod network;
 #[cfg(test)]
 mod tests {
-    use crate::network::network::Network as NN;
+  use crate::network::network::Network as NN;
 
   #[test]
   fn test_network_drop() {

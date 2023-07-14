@@ -2,7 +2,7 @@
 mod macros;
 
 pub mod network {
-  use nn::matrix::{Mat, dot_product, addition};
+  use nn::matrix::{addition, dot_product, Mat};
   use std::ptr;
 
   pub struct Network {
@@ -49,7 +49,6 @@ pub mod network {
 
       return nn;
     }
-    // ... existing code
 
     pub fn get_weights(&self) -> Vec<Mat> {
       unsafe {
@@ -102,6 +101,7 @@ pub mod network {
       }
       println!("]");
     }
+    
     pub fn rand(&mut self, low: f64, high: f64) {
       for i in 0..self.count {
         unsafe {

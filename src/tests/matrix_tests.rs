@@ -2,8 +2,8 @@
 mod macros;
 #[cfg(test)]
 mod tests {
-  use nn::matrix::{Mat, dot_product, addition, subtraction};
   use super::*;
+  use nn::matrix::{addition, dot_product, subtraction, Mat};
 
   #[test]
   fn test_new_matrix() {

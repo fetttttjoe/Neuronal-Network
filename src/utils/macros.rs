@@ -1,5 +1,5 @@
 pub mod macros {
-  #[macro_export] 
+  #[macro_export]
   macro_rules! safe_get {
     ($mat:expr, $i:expr, $j:expr) => {
       match $mat.get($i, $j) {
